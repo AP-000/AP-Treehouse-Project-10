@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wheel of Success 2.0!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./css/styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Main landmark -->
+    <main class="main-container">
+      <!-- Overlay -->
+      <section
+        id="overlay"
+        class="start"
+        role="dialog"
+        aria-labelledby="game-title"
+      >
+        <h1 id="game-title" class="title">Wheel of Success 2.0</h1>
+        <form id="setup-form">
+          <fieldset>
+            <legend class="visually-hidden">Game Setup</legend>
+            <div class="label-select-container">
+              <label class="form-label" for="difficulty"
+                >Select Difficulty:</label
+              >
+              <select id="difficulty" name="difficulty">
+                <option value="easy" selected>Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+            <div class="label-select-container">
+              <label class="form-label" for="lifeicon">Select Life Icon:</label>
+              <select id="lifeicon" name="lifeicon">
+                <option value="Heart" selected>Hearts ❤️</option>
+                <option value="Emoji">Emojis 😀</option>
+                <option value="Shield">Shields 🛡️</option>
+                <option value="Thumbs">Thumbs 👍</option>
+              </select>
+            </div>
+            <!--
+            <div class="label-select-container">
+              <label for="theme" class="form-label">Choose Theme:</label>
+              <select id="theme" name="theme">
+                <option value="classic">Classic</option>
+                <option value="dark">Dark</option>
+                <option value="neon">Neon</option>
+              </select>
+            </div> -->
+            <button type="submit" class="btn_reset">Start Game</button>
+          </fieldset>
+        </form>
+        <!-- Win Screen Markup -->
+        <!--
+        <h2 class="title">You Win!</h2>
+        <p>Current Streak: 1</p>
+        <p>Best Streak: 1</p>
+        <div class="button-container">
+          <button class="btn_reset">Play Again</button>
+          <button class="btn_home">Home</button>
+        </div> -->
+        <!-- Lose Screen Markup -->
+        <!--
+        <h2 class="title">You Lose!</h2>
+        <p>Best Streak: 1</p>
+        <div class="button-container">
+          <button class="btn_reset">Try Again</button>
+          <button class="btn_home">Home</button>
+        </div>-->
+      </section>
+
+      <!-- Game banner -->
+      <header id="banner" class="section">
+        <h2 class="header">Wheel of Success 2.0</h2>
+      </header>
+
+      <!-- Timer -->
+      <section id="timer" class="section" aria-live="polite"></section>
+
+      <!-- Word definition area -->
+      <section id="definition">
+        <p></p>
+      </section>
+
+      <!-- Word display (the puzzle) -->
+      <section id="word" class="section" aria-label="Puzzle Word">
+        <ul></ul>
+      </section>
+
+      <!-- On-screen keyboard -->
+      <section id="qwerty" class="section" aria-label="On-screen Keyboard">
+        <div class="keyrow" role="group" aria-label="Top row letters">
+          <button>q</button><button>w</button><button>e</button>
+          <button>r</button><button>t</button><button>y</button>
+          <button>u</button><button>i</button><button>o</button
+          ><button>p</button>
+        </div>
+        <div class="keyrow" role="group" aria-label="Home row letters">
+          <button>a</button><button>s</button><button>d</button>
+          <button>f</button><button>g</button><button>h</button>
+          <button>j</button><button>k</button><button>l</button>
+        </div>
+        <div class="keyrow" role="group" aria-label="Bottom row letters">
+          <button>z</button><button>x</button><button>c</button>
+          <button>v</button><button>b</button><button>n</button
+          ><button>m</button>
+        </div>
+      </section>
+
+      <!-- Scoreboard -->
+      <aside id="scoreboard" class="section" aria-label="Lives Remaining">
+        <ol>
+          <li class="tries">
+            <img
+              src="./images/liveHeart.png"
+              alt="Life remaining"
+              width="30"
+              height="35"
+            />
+          </li>
+          <li class="tries">
+            <img
+              src="./images/liveHeart.png"
+              alt="Life remaining"
+              width="30"
+              height="35"
+            />
+          </li>
+          <li class="tries">
+            <img
+              src="./images/liveHeart.png"
+              alt="Life remaining"
+              width="30"
+              height="35"
+            />
+          </li>
+          <li class="tries">
+            <img
+              src="./images/liveHeart.png"
+              alt="Life remaining"
+              width="30"
+              height="35"
+            />
+          </li>
+          <li class="tries">
+            <img
+              src="./images/liveHeart.png"
+              alt="Life remaining"
+              width="30"
+              height="35"
+            />
+          </li>
+        </ol>
+      </aside>
+    </main>
+
+    <script type="text/javascript" src="./js/app.js"></script>
+  </body>
+</html>
