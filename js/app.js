@@ -1,6 +1,8 @@
 const qwerty = document.getElementById("qwerty");
 const word = document.getElementById("word");
 const overlay = document.getElementById("overlay");
+const timer = document.getElementById("timer");
+const timerParagraph = timer.querySelector("p");
 const lifeIcons = document.querySelectorAll("#scoreboard img");
 const wordList = word.querySelector("ul");
 const initialOverlayMarkup = `
@@ -25,6 +27,14 @@ const initialOverlayMarkup = `
 					<option value="Thumbs">Thumbs 👍</option>
 				</select>
 			</div>
+			<div class="label-select-container">
+				<label for="theme" class="form-label">Choose Theme:</label>
+				<select id="theme" name="theme">
+					<option value="classic">Classic</option>
+					<option value="dark">Dark</option>
+					<option value="neon">Neon</option>
+				</select>
+			</div>
 			<button type="submit" class="btn_reset">Start Game</button>
 		</fieldset>
 	</form>
@@ -34,23 +44,29 @@ const difficultyWordLengths = {
 	medium: 6,
 	hard: 9,
 };
+const themeStorageKey = "selectedTheme";
+const totalTime = 25;
 
 let gameTitle = document.getElementById("game-title");
 let setupForm = document.getElementById("setup-form");
 let difficultySelect = document.getElementById("difficulty");
 let lifeIconSelect = document.getElementById("lifeicon");
+let themeSelect = document.getElementById("theme");
 
 let missed = 0;
 let selectedDifficulty = "";
 let selectedLifeIcon = "";
 let randomWord = "";
 let currentWinStreak = 0;
+let timeRemaining = totalTime;
+let timerIntervalId = null;
 
 function cacheOverlayElements() {
 	gameTitle = document.getElementById("game-title");
 	setupForm = document.getElementById("setup-form");
 	difficultySelect = document.getElementById("difficulty");
 	lifeIconSelect = document.getElementById("lifeicon");
+	themeSelect = document.getElementById("theme");
 }
 
 function getBestStreakKey(difficulty) {
@@ -59,6 +75,20 @@ function getBestStreakKey(difficulty) {
 
 function getCurrentStreakKey(difficulty) {
 	return `currentStreak_${difficulty}`;
+}
+
+function saveThemeSelection(theme) {
+	localStorage.setItem(themeStorageKey, theme);
+}
+
+function loadThemeSelection() {
+	const savedTheme = localStorage.getItem(themeStorageKey) ?? "classic";
+
+	document.documentElement.dataset.theme = savedTheme;
+
+	if (themeSelect) {
+		themeSelect.value = savedTheme;
+	}
 }
 
 function saveCurrentStreak() {
@@ -90,11 +120,61 @@ function resetKeyboard() {
 	});
 }
 
+function updateTimerDisplay() {
+	if (selectedDifficulty === "hard") {
+		timerParagraph.textContent = `Time Remaining: ${timeRemaining}`;
+		return;
+	}
+
+	timerParagraph.textContent = "";
+}
+
+function stopTimer() {
+	if (timerIntervalId) {
+		clearInterval(timerIntervalId);
+		timerIntervalId = null;
+	}
+}
+
+function startTimer() {
+	if (selectedDifficulty !== "hard") {
+		stopTimer();
+		updateTimerDisplay();
+		return;
+	}
+
+	stopTimer();
+	timeRemaining = totalTime;
+	updateTimerDisplay();
+
+	timerIntervalId = setInterval(() => {
+		timeRemaining -= 1;
+		updateTimerDisplay();
+
+		if (timeRemaining > 0 && timeRemaining % 5 === 0) {
+			removeLife();
+			checkWin();
+		}
+
+		if (timeRemaining <= 0) {
+			stopTimer();
+
+			if (missed < 5) {
+				removeLife();
+				checkWin();
+			}
+		}
+	}, 1000);
+}
+
 function resetGameBoard() {
+	stopTimer();
 	missed = 0;
 	randomWord = "";
+	timeRemaining = totalTime;
 	wordList.innerHTML = "";
 	document.querySelector("#definition p").textContent = "";
+	updateTimerDisplay();
 	resetKeyboard();
 
 	lifeIcons.forEach((icon) => {
@@ -102,12 +182,17 @@ function resetGameBoard() {
 	});
 }
 
+function clearRoundDisplay() {
+	wordList.innerHTML = "";
+	document.querySelector("#definition p").textContent = "";
+}
+
 async function fetchRandomWord() {
 	const wordLength = difficultyWordLengths[selectedDifficulty];
 
 	try {
 		const response = await fetch(
-			`https://random-word-api.vercel.app/api?words=1&length=${wordLength}`
+			`https://random-word-api.herokuapp.com/word?length=${wordLength}`
 		);
 
 		if (!response.ok) {
@@ -124,6 +209,14 @@ async function fetchRandomWord() {
 async function fetchAndShowDefinition(gameWord) {
 	const definition = document.getElementById("definition");
 	const definitionParagraph = definition.querySelector("p");
+	const partOfSpeechLabels = {
+		n: "Noun",
+		v: "Verb",
+		adj: "Adjective",
+		adv: "Adverb",
+		u: "Unknown",
+		prop: "Proper Noun",
+	};
 
 	try {
 		const response = await fetch(
@@ -136,8 +229,12 @@ async function fetchAndShowDefinition(gameWord) {
 
 		const [wordData] = await response.json();
 		const firstDefinition = wordData?.defs?.[0] ?? "No definition available.";
+		const [partOfSpeech, definitionText] = firstDefinition.split("\t");
+		const partOfSpeechLabel = partOfSpeechLabels[partOfSpeech];
 
-		definitionParagraph.textContent = firstDefinition;
+		definitionParagraph.textContent = definitionText
+			? `${partOfSpeechLabel ?? partOfSpeech}: ${definitionText}`
+			: firstDefinition;
 	} catch (error) {
 		console.error(error);
 		definitionParagraph.textContent = "Definition unavailable.";
@@ -153,6 +250,7 @@ async function startGame() {
 	const wordArray = getRandomWordAsArray(randomWord);
 	addWordToDisplay(wordArray);
 	await fetchAndShowDefinition(randomWord);
+	startTimer();
 }
 
 function getRandomWordAsArray(gameWord) {
@@ -199,6 +297,9 @@ function showEndScreen(result) {
 	const heading = result === "win" ? "You Win!" : "You Lose!";
 	const bestWinStreak = getBestStreak();
 
+	stopTimer();
+	clearRoundDisplay();
+
 	overlay.className = result;
 	overlay.style.display = "flex";
 	overlay.innerHTML = `
@@ -222,6 +323,7 @@ function returnToStartScreen() {
 	overlay.style.display = "flex";
 	overlay.innerHTML = initialOverlayMarkup;
 	cacheOverlayElements();
+	loadThemeSelection();
 	bindSetupForm();
 }
 
@@ -301,6 +403,9 @@ async function handleSetupSubmit(event) {
 
 	selectedDifficulty = difficultySelect.value;
 	selectedLifeIcon = lifeIconSelect.value;
+	const selectedTheme = themeSelect.value;
+	saveThemeSelection(selectedTheme);
+	document.documentElement.dataset.theme = selectedTheme;
 	currentWinStreak = Number(
 		localStorage.getItem(getCurrentStreakKey(selectedDifficulty)) ?? 0
 	);
@@ -313,5 +418,9 @@ function bindSetupForm() {
 		setupForm.addEventListener("submit", handleSetupSubmit);
 	}
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+	loadThemeSelection();
+});
 
 bindSetupForm();
