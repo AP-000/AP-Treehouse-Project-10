@@ -143,13 +143,53 @@ header#banner .header {
   color: transparent;
   background: var(--color-neutral-light);
   border-radius: var(--radius);
-  transition: background-color 0.3s, color 0.3s, transform 0.3s;
+  transform: scale(0.92) rotate(-3deg);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition: background-color 0.35s ease, color 0.35s ease,
+    transform 0.35s ease, box-shadow 0.35s ease;
 }
 
 .letter.show,
 .show {
   color: var(--color-letter-revealed);
   background-color: var(--color-letter-revealed-bg);
+  transform: scale(1) rotate(0deg);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14);
+  animation: letterReveal 0.55s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+@keyframes letterReveal {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.7) rotate(-10deg);
+    filter: saturate(0.75);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1.16) rotate(4deg);
+    filter: saturate(1.25);
+  }
+
+  70% {
+    transform: scale(0.96) rotate(-2deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: saturate(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter,
+  .letter.show,
+  .show {
+    animation: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    transform: none;
+  }
 }
 
 /* Keyboard */
